@@ -11,7 +11,7 @@ elements.baby = {
     "XX|M1|XX",
 ],
     category: "food",
-    breakInto: ["meat", "meat", "blood"],
+    breakInto: ["meat", "meat", "blood", "diamond"],
     state: "solid",
     tempHigh: 120,
     tempLow: -20,
