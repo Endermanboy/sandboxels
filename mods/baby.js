@@ -10,7 +10,7 @@ elements.baby = {
     "M2%3|XX|M2%3",
     "XX|M1|XX",
 ],
-    category: "life",
+    category: "food",
     breakInto: ["meat", "meat", "blood"],
     state: "solid",
     tempHigh: 120,
