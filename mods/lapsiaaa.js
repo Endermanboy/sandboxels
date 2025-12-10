@@ -9,6 +9,6 @@ elements.child =  {
   stateHigh: "cooked_meat",
   category: "life",
   reactions:  {
-    "herb":  { elem1: "blood", elem2: "explosion"}
+    "herb":  { elem1: "blood", elem2: "explosion", elem3: "water"}
 },
 };
