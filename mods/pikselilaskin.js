@@ -1,9 +1,9 @@
 // pixel_counter_mod.js
-// Näyttää kaikkien elementtien pikselimäärät ruudun kulmassa.
+// Erittäin tarkka pikselilaskuri – laskee joka pelitickillä synkassa pelin kanssa.
 
 if (typeof elements !== "undefined") {
 
-    // Luodaan overlay-elementti
+    // Näyttölaatikko
     var counterBox = document.createElement("div");
     counterBox.style.position = "absolute";
     counterBox.style.left = "10px";
@@ -14,19 +14,28 @@ if (typeof elements !== "undefined") {
     counterBox.style.fontFamily = "monospace";
     counterBox.style.fontSize = "14px";
     counterBox.style.borderRadius = "6px";
+    counterBox.style.whiteSpace = "pre";
     counterBox.style.zIndex = "999999";
-    counterBox.innerText = "Pixel Counter";
     document.body.appendChild(counterBox);
 
+    // Tallennetaan alkuperäinen pixelTick
+    var originalPixelTick = pixelTick;
+
+    // Ylikirjoitetaan pixelTick, jotta laskuri on aina 100% ajan tasalla
+    pixelTick = function(pixel) {
+        originalPixelTick(pixel);
+        updatePixelCounts();
+    };
+
+    // Laskentafunktio (hyvin nopea, koska se tekee yhden kierroksen)
     function updatePixelCounts() {
         var counts = {};
         var total = 0;
 
-        // Käydään läpi koko maailmagrid
         for (var x = 0; x < width; x++) {
             for (var y = 0; y < height; y++) {
                 var p = pixelMap[x][y];
-                if (p !== null && p !== undefined) {
+                if (p) {
                     total++;
                     var name = p.element;
                     if (!counts[name]) counts[name] = 0;
@@ -36,14 +45,12 @@ if (typeof elements !== "undefined") {
         }
 
         // Rakennetaan teksti
-        var out = `Kaikkia pikseleitä: ${total}\n`;
-        for (var key in counts) {
-            out += `${key}: ${counts[key]}\n`;
+        var text = `Kaikkia pikseleitä: ${total}\n`;
+        for (var e in counts) {
+            text += `${e}: ${counts[e]}\n`;
         }
 
-        counterBox.innerText = out;
+        counterBox.innerText = text;
     }
 
-    // Päivitetään laskurit 1 sekunnin välein
-    setInterval(updatePixelCounts, 1000);
 }
