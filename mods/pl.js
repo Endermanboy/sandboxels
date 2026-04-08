@@ -1,60 +1,62 @@
-/* Pixel Counter Mod - Robust Injection */
+/* Pixel Counter Mod - HTML Overlay Version */
 
 let showCounter = false;
 let lastPixelCounts = {};
+let displayDiv = null;
 
-function addCounterButton() {
-    // Etsitään paikka, johon nappi laitetaan (erilaisia vaihtoehtoja Sandboxelsin eri versioille)
-    let container = document.getElementById("topBar") || 
-                    document.querySelector(".button-container") || 
-                    document.body;
+// 1. Luodaan tilastovalikko (HTML-elementti)
+function createDisplay() {
+    if (document.getElementById("pixelDisplay")) return;
+    
+    displayDiv = document.createElement("div");
+    displayDiv.id = "pixelDisplay";
+    displayDiv.style.position = "absolute";
+    displayDiv.style.top = "50px";
+    displayDiv.style.left = "10px";
+    displayDiv.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
+    displayDiv.style.color = "#00FF00";
+    displayDiv.style.padding = "10px";
+    displayDiv.style.borderRadius = "5px";
+    displayDiv.style.fontFamily = "monospace";
+    displayDiv.style.zIndex = "10000";
+    displayDiv.style.display = "none"; // Piilossa aluksi
+    displayDiv.style.pointerEvents = "none"; // Ei estä hiiren käyttöä pelissä
+    displayDiv.innerHTML = "<strong>PIXEL COUNTS</strong><div id='pixelList'></div>";
+    
+    document.body.appendChild(displayDiv);
+}
 
-    // Poistetaan vanha nappi, jos se on jo olemassa (estää tuplakuvakkeet)
+// 2. Luodaan painike yläpalkkiin
+function injectButton() {
+    let container = document.getElementById("topBar") || document.body;
     if (document.getElementById("pixelCounterBtn")) return;
 
     let btn = document.createElement("span");
     btn.id = "pixelCounterBtn";
     btn.innerHTML = "Pixels";
-    
-    // Tyylitellään nappi näyttämään pelin omalta napilta
     btn.style.padding = "2px 8px";
     btn.style.margin = "2px";
     btn.style.cursor = "pointer";
     btn.style.border = "1px solid #fff";
     btn.style.borderRadius = "4px";
     btn.style.display = "inline-block";
-    btn.style.verticalAlign = "middle";
-    btn.style.fontSize = "14px";
-    btn.style.fontWeight = "bold";
     btn.style.backgroundColor = "#4CAF50";
     btn.style.color = "white";
-    btn.style.userSelect = "none";
+    btn.style.fontWeight = "bold";
 
     btn.onclick = function() {
         showCounter = !showCounter;
+        displayDiv.style.display = showCounter ? "block" : "none";
         btn.style.backgroundColor = showCounter ? "#f44336" : "#4CAF50";
         btn.innerHTML = showCounter ? "Close" : "Pixels";
     };
 
-    // Jos topBaria ei löydy, laitetaan nappi kellumaan yläreunaan
-    if (container === document.body) {
-        btn.style.position = "fixed";
-        btn.style.top = "5px";
-        btn.style.left = "50%";
-        btn.style.transform = "translateX(-50%)";
-        btn.style.zIndex = "9999";
-    }
-
     container.appendChild(btn);
 }
 
-// Suoritetaan heti ja uudestaan hetken kuluttua varmuuden vuoksi
-addCounterButton();
-setTimeout(addCounterButton, 2000);
-
-// Laskenta-logiikka
+// 3. Laskenta ja tekstin päivitys
 runAfterTick(() => {
-    if (!showCounter) return;
+    if (!showCounter || !displayDiv) return;
 
     let counts = {};
     for (let y = 0; y < height; y++) {
@@ -66,35 +68,17 @@ runAfterTick(() => {
             }
         }
     }
-    lastPixelCounts = counts;
+
+    // Päivitetään HTML-listaus
+    let listHtml = "";
+    let sorted = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
+    
+    for (let el of sorted) {
+        listHtml += `<br>${el.toUpperCase()}: ${counts[el]}`;
+    }
+    document.getElementById("pixelList").innerHTML = listHtml;
 });
 
-// Piirretään tiedot
-const originalRenderPizzazz = window.renderPizzazz;
-window.renderPizzazz = function(ctx) {
-    if (originalRenderPizzazz) originalRenderPizzazz(ctx);
-    
-    if (showCounter) {
-        let sortedElements = Object.keys(lastPixelCounts).sort((a, b) => lastPixelCounts[b] - lastPixelCounts[a]);
-        
-        // Pieni ikkuna näytön vasempaan laitaan
-        ctx.fillStyle = "rgba(0, 0, 0, 0.85)";
-        ctx.fillRect(10, 60, 160, (sortedElements.length * 20) + 40);
-        ctx.strokeStyle = "#4CAF50";
-        ctx.lineWidth = 2;
-        ctx.strokeRect(10, 60, 160, (sortedElements.length * 20) + 40);
-
-        ctx.fillStyle = "#4CAF50";
-        ctx.font = "bold 14px Arial";
-        ctx.fillText("PIXELS", 20, 85);
-
-        ctx.fillStyle = "white";
-        ctx.font = "12px monospace";
-        
-        let textY = 105;
-        for (let el of sortedElements) {
-            ctx.fillText(`${el}: ${lastPixelCounts[el]}`, 20, textY);
-            textY += 20;
-        }
-    }
-};
+// Käynnistys
+createDisplay();
+injectButton();
