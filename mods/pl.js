@@ -10,24 +10,25 @@ function createDisplay() {
     displayDiv.style.position = "fixed";
     displayDiv.style.top = "60px";
     displayDiv.style.right = "10px";
-    displayDiv.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
+    displayDiv.style.backgroundColor = "rgba(0, 0, 0, 0.9)";
     displayDiv.style.color = "#00FF00";
-    displayDiv.style.padding = "10px";
+    displayDiv.style.padding = "15px";
     displayDiv.style.borderRadius = "5px";
     displayDiv.style.fontFamily = "monospace";
     displayDiv.style.zIndex = "10000";
     displayDiv.style.display = "none";
     displayDiv.style.pointerEvents = "none";
-    displayDiv.style.maxHeight = "300px";
+    displayDiv.style.maxHeight = "400px";
     displayDiv.style.overflowY = "auto";
     displayDiv.style.fontSize = "12px";
+    displayDiv.style.border = "2px solid #00FF00";
 
-    displayDiv.innerHTML = "<strong>PIXEL COUNTS</strong><div id='pixelList'></div>";
+    displayDiv.innerHTML = "<strong style='color: #00FF00;'>PIXEL COUNTS</strong><div id='pixelList' style='margin-top: 10px;'></div>";
 
     document.body.appendChild(displayDiv);
 }
 
-// Add button - find any visible container or create one
+// Add button
 function injectButton() {
     if (document.getElementById("pixelCounterBtn")) return;
 
@@ -70,19 +71,21 @@ let lastUpdate = 0;
 function updateCounter() {
     if (!showCounter || !displayDiv) return;
 
+    // Make sure currentPixels exists
+    if (typeof currentPixels === "undefined") return;
+
     let now = Date.now();
     if (now - lastUpdate < 500) return;
     lastUpdate = now;
 
     let counts = {};
 
-    for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
-            let pixel = pixelMap[x][y];
-            if (pixel) {
-                let name = pixel.element;
-                counts[name] = (counts[name] || 0) + 1;
-            }
+    // Use currentPixels instead of looping pixelMap
+    for (let i = 0; i < currentPixels.length; i++) {
+        let pixel = currentPixels[i];
+        if (pixel && pixel.element) {
+            let name = pixel.element;
+            counts[name] = (counts[name] || 0) + 1;
         }
     }
 
@@ -90,7 +93,7 @@ function updateCounter() {
 
     let listHtml = "";
     for (let el of sorted.slice(0, 20)) {
-        listHtml += `<br>${el.toUpperCase()}: ${counts[el]}`;
+        listHtml += `<div style='margin: 5px 0;'>${el}: <span style='color: #ffff00;'>${counts[el]}</span></div>`;
     }
 
     let list = document.getElementById("pixelList");
