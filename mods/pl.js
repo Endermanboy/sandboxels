@@ -2,117 +2,69 @@ let showCounter = false;
 let displayDiv = null;
 
 function createDisplay() {
-    if (document.getElementById("pixelDisplay")) return;
-
     displayDiv = document.createElement("div");
     displayDiv.id = "pixelDisplay";
     displayDiv.style.position = "fixed";
-    displayDiv.style.top = "60px";
-    displayDiv.style.right = "10px";
-    displayDiv.style.backgroundColor = "rgba(0, 0, 0, 0.9)";
-    displayDiv.style.color = "#00FF00";
-    displayDiv.style.padding = "15px";
-    displayDiv.style.borderRadius = "5px";
-    displayDiv.style.fontFamily = "monospace";
-    displayDiv.style.zIndex = "10000";
+    displayDiv.style.top = "50px";
+    displayDiv.style.left = "10px";
+    displayDiv.style.width = "300px";
+    displayDiv.style.backgroundColor = "black";
+    displayDiv.style.color = "lime";
+    displayDiv.style.padding = "10px";
+    displayDiv.style.border = "3px solid lime";
+    displayDiv.style.zIndex = "99999";
     displayDiv.style.display = "none";
-    displayDiv.style.pointerEvents = "auto";
-    displayDiv.style.maxHeight = "400px";
-    displayDiv.style.overflowY = "auto";
-    displayDiv.style.fontSize = "12px";
-    displayDiv.style.minWidth = "250px";
+    displayDiv.style.fontSize = "14px";
+    displayDiv.style.fontFamily = "monospace";
 
-    displayDiv.innerHTML = "<strong style='color: #ffff00;'>PIXEL COUNTS</strong><div id='pixelList'></div>";
+    displayDiv.innerHTML = "PIXELS: 0";
 
     document.body.appendChild(displayDiv);
 }
 
 function injectButton() {
-    if (document.getElementById("pixelCounterBtn")) return;
-
     let btn = document.createElement("button");
     btn.id = "pixelCounterBtn";
-    btn.innerHTML = "Pixels";
+    btn.innerHTML = "SHOW PIXELS";
 
     btn.style.position = "fixed";
     btn.style.top = "10px";
-    btn.style.right = "10px";
-    btn.style.zIndex = "9999";
-    btn.style.backgroundColor = "#4CAF50";
+    btn.style.left = "10px";
+    btn.style.width = "120px";
+    btn.style.height = "30px";
+    btn.style.zIndex = "99998";
+    btn.style.backgroundColor = "green";
     btn.style.color = "white";
     btn.style.border = "2px solid white";
-    btn.style.padding = "8px 12px";
-    btn.style.cursor = "pointer";
-    btn.style.fontSize = "14px";
+    btn.style.fontSize = "12px";
     btn.style.fontWeight = "bold";
-    btn.style.fontFamily = "Arial, sans-serif";
+    btn.style.cursor = "pointer";
 
-    btn.onclick = function (e) {
-        e.stopPropagation();
+    btn.onclick = function () {
         showCounter = !showCounter;
-
-        if (displayDiv) {
-            displayDiv.style.display = showCounter ? "block" : "none";
-            if (showCounter) {
-                updateCounter();
-            }
-        }
-
-        btn.style.backgroundColor = showCounter ? "#f44336" : "#4CAF50";
-        btn.innerHTML = showCounter ? "Close" : "Pixels";
+        displayDiv.style.display = showCounter ? "block" : "none";
+        btn.innerHTML = showCounter ? "HIDE" : "SHOW PIXELS";
+        btn.style.backgroundColor = showCounter ? "red" : "green";
     };
 
     document.body.appendChild(btn);
 }
 
-let lastUpdate = 0;
+// Main update loop
+function countPixels() {
+    if (!showCounter || !displayDiv) return;
 
-function updateCounter() {
-    if (!displayDiv) return;
-
-    let now = Date.now();
-    if (now - lastUpdate < 100) return;
-    lastUpdate = now;
-
-    let listHtml = "";
-
-    // TEST: Show what variables exist
-    if (typeof currentPixels === "undefined") {
-        listHtml = "<span style='color: #ff0000;'>ERROR: currentPixels undefined</span>";
-    } else if (!Array.isArray(currentPixels)) {
-        listHtml = "<span style='color: #ff0000;'>ERROR: currentPixels not array</span>";
-    } else if (currentPixels.length === 0) {
-        listHtml = "<span style='color: #ffaa00;'>No pixels placed (array empty)</span>";
-    } else {
-        let counts = {};
-
-        for (let i = 0; i < currentPixels.length; i++) {
-            let pixel = currentPixels[i];
-            if (pixel && pixel.element) {
-                counts[pixel.element] = (counts[pixel.element] || 0) + 1;
-            }
-        }
-
-        let sorted = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
-
-        listHtml = `<div style='color: #ffff00; margin: 8px 0; font-weight: bold;'>Total: ${currentPixels.length}</div>`;
-        
-        for (let el of sorted.slice(0, 20)) {
-            listHtml += `<div style='margin: 4px 0;'>${el}: <span style='color: #00ff00;'>${counts[el]}</span></div>`;
-        }
+    let total = 0;
+    
+    if (typeof currentPixels !== "undefined" && currentPixels) {
+        total = currentPixels.length;
     }
 
-    let list = document.getElementById("pixelList");
-    if (list) list.innerHTML = listHtml;
+    displayDiv.innerHTML = "TOTAL PIXELS: " + total;
 }
 
-// Initialize
+// Run the counter
 createDisplay();
 injectButton();
 
-// Update continuously while showing
-setInterval(() => {
-    if (showCounter) {
-        updateCounter();
-    }
-}, 100);
+setInterval(countPixels, 100);
