@@ -10,7 +10,7 @@
   "orientation": "any",
   "icons": [
     {
-      "src": "icons/ok.png?v=2",
+      "src": "icons/ok.png",
       "sizes": "256x256",
       "type": "image/png"
     },
