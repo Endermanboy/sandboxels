@@ -1,15 +1,15 @@
 let showCounter = false;
 let displayDiv = null;
 
-// Luo UI vasta kun DOM varmasti valmis
+// Create UI when DOM is ready
 function createDisplay() {
     if (document.getElementById("pixelDisplay")) return;
 
     displayDiv = document.createElement("div");
     displayDiv.id = "pixelDisplay";
-    displayDiv.style.position = "absolute";
-    displayDiv.style.top = "50px";
-    displayDiv.style.left = "10px";
+    displayDiv.style.position = "fixed";
+    displayDiv.style.top = "60px";
+    displayDiv.style.right = "10px";
     displayDiv.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
     displayDiv.style.color = "#00FF00";
     displayDiv.style.padding = "10px";
@@ -20,38 +20,37 @@ function createDisplay() {
     displayDiv.style.pointerEvents = "none";
     displayDiv.style.maxHeight = "300px";
     displayDiv.style.overflowY = "auto";
+    displayDiv.style.fontSize = "12px";
 
     displayDiv.innerHTML = "<strong>PIXEL COUNTS</strong><div id='pixelList'></div>";
 
     document.body.appendChild(displayDiv);
 }
 
-// Lisää nappi turvallisesti
+// Add button - find any visible container or create one
 function injectButton() {
-    let topBar = document.getElementById("topBar");
-
-    if (!topBar) {
-        setTimeout(injectButton, 300); // vähän pidempi odotus
-        return;
-    }
-
     if (document.getElementById("pixelCounterBtn")) return;
 
     let btn = document.createElement("button");
     btn.id = "pixelCounterBtn";
     btn.innerHTML = "Pixels";
 
+    btn.style.position = "fixed";
+    btn.style.top = "10px";
+    btn.style.right = "10px";
+    btn.style.zIndex = "9999";
     btn.style.backgroundColor = "#4CAF50";
     btn.style.color = "white";
-    btn.style.border = "1px solid white";
+    btn.style.border = "2px solid white";
     btn.style.borderRadius = "4px";
-    btn.style.padding = "2px 6px";
+    btn.style.padding = "8px 12px";
     btn.style.cursor = "pointer";
-    btn.style.marginLeft = "5px";
-    btn.style.fontSize = "13px";
+    btn.style.fontSize = "14px";
     btn.style.fontWeight = "bold";
+    btn.style.fontFamily = "Arial, sans-serif";
 
-    btn.onclick = function () {
+    btn.onclick = function (e) {
+        e.stopPropagation();
         showCounter = !showCounter;
 
         if (displayDiv) {
@@ -62,10 +61,10 @@ function injectButton() {
         btn.innerHTML = showCounter ? "Close" : "Pixels";
     };
 
-    topBar.appendChild(btn);
+    document.body.appendChild(btn);
 }
 
-// Päivitys (throttlattu ettei lagaa)
+// Update counter (throttled)
 let lastUpdate = 0;
 
 function updateCounter() {
@@ -98,16 +97,14 @@ function updateCounter() {
     if (list) list.innerHTML = listHtml;
 }
 
-// 🔑 TÄRKEIN FIX: odotetaan peliä
+// Initialize when game loads
 window.addEventListener("load", () => {
     createDisplay();
     injectButton();
 
-    // Sandboxels tick hook
     if (typeof runAfterTick === "function") {
         runAfterTick(updateCounter);
     } else {
-        // fallback jos hook ei vielä valmis
         let interval = setInterval(() => {
             if (typeof runAfterTick === "function") {
                 runAfterTick(updateCounter);
