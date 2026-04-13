@@ -1,6 +1,5 @@
 let showCounter = false;
 let displayDiv = null;
-let debugDiv = null;
 
 function createDisplay() {
     if (document.getElementById("pixelDisplay")) return;
@@ -21,9 +20,9 @@ function createDisplay() {
     displayDiv.style.maxHeight = "400px";
     displayDiv.style.overflowY = "auto";
     displayDiv.style.fontSize = "12px";
-    displayDiv.style.minWidth = "200px";
+    displayDiv.style.minWidth = "250px";
 
-    displayDiv.innerHTML = "<strong>PIXEL COUNTS</strong><div id='pixelList'>Waiting for data...</div>";
+    displayDiv.innerHTML = "<strong style='color: #ffff00;'>PIXEL COUNTS</strong><div id='pixelList'></div>";
 
     document.body.appendChild(displayDiv);
 }
@@ -46,6 +45,7 @@ function injectButton() {
     btn.style.cursor = "pointer";
     btn.style.fontSize = "14px";
     btn.style.fontWeight = "bold";
+    btn.style.fontFamily = "Arial, sans-serif";
 
     btn.onclick = function (e) {
         e.stopPropagation();
@@ -53,6 +53,9 @@ function injectButton() {
 
         if (displayDiv) {
             displayDiv.style.display = showCounter ? "block" : "none";
+            if (showCounter) {
+                updateCounter();
+            }
         }
 
         btn.style.backgroundColor = showCounter ? "#f44336" : "#4CAF50";
@@ -65,43 +68,38 @@ function injectButton() {
 let lastUpdate = 0;
 
 function updateCounter() {
-    if (!showCounter || !displayDiv) return;
+    if (!displayDiv) return;
 
     let now = Date.now();
-    if (now - lastUpdate < 200) return;
+    if (now - lastUpdate < 100) return;
     lastUpdate = now;
 
-    let counts = {};
+    let listHtml = "";
 
-    // Check what's available
+    // TEST: Show what variables exist
     if (typeof currentPixels === "undefined") {
-        document.getElementById("pixelList").innerHTML = "ERROR: currentPixels undefined";
-        return;
-    }
+        listHtml = "<span style='color: #ff0000;'>ERROR: currentPixels undefined</span>";
+    } else if (!Array.isArray(currentPixels)) {
+        listHtml = "<span style='color: #ff0000;'>ERROR: currentPixels not array</span>";
+    } else if (currentPixels.length === 0) {
+        listHtml = "<span style='color: #ffaa00;'>No pixels placed (array empty)</span>";
+    } else {
+        let counts = {};
 
-    if (!Array.isArray(currentPixels)) {
-        document.getElementById("pixelList").innerHTML = "ERROR: currentPixels not an array";
-        return;
-    }
-
-    if (currentPixels.length === 0) {
-        document.getElementById("pixelList").innerHTML = "No pixels placed yet";
-        return;
-    }
-
-    // Count pixels
-    for (let i = 0; i < currentPixels.length; i++) {
-        let pixel = currentPixels[i];
-        if (pixel && pixel.element) {
-            counts[pixel.element] = (counts[pixel.element] || 0) + 1;
+        for (let i = 0; i < currentPixels.length; i++) {
+            let pixel = currentPixels[i];
+            if (pixel && pixel.element) {
+                counts[pixel.element] = (counts[pixel.element] || 0) + 1;
+            }
         }
-    }
 
-    let sorted = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
+        let sorted = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
 
-    let listHtml = `<div style='margin: 10px 0; color: #ffff00;'>Total: ${currentPixels.length}</div>`;
-    for (let el of sorted.slice(0, 20)) {
-        listHtml += `<div style='margin: 5px 0;'>${el}: <strong>${counts[el]}</strong></div>`;
+        listHtml = `<div style='color: #ffff00; margin: 8px 0; font-weight: bold;'>Total: ${currentPixels.length}</div>`;
+        
+        for (let el of sorted.slice(0, 20)) {
+            listHtml += `<div style='margin: 4px 0;'>${el}: <span style='color: #00ff00;'>${counts[el]}</span></div>`;
+        }
     }
 
     let list = document.getElementById("pixelList");
@@ -112,12 +110,9 @@ function updateCounter() {
 createDisplay();
 injectButton();
 
-// Try to hook into game loop
-if (typeof runEveryTick === "function") {
-    runEveryTick(updateCounter);
-} else if (typeof runAfterTick === "function") {
-    runAfterTick(updateCounter);
-} else {
-    // Fallback: update every frame manually
-    setInterval(updateCounter, 100);
-}
+// Update continuously while showing
+setInterval(() => {
+    if (showCounter) {
+        updateCounter();
+    }
+}, 100);
