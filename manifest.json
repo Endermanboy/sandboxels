@@ -10,22 +10,22 @@
   "orientation": "any",
   "icons": [
     {
-      "src": "icons/ok.png",
+      "src": "icons/icon.png?v=3",
       "sizes": "256x256",
       "type": "image/png"
     },
     {
-        "src": "icons/ok.png?v=2",
+        "src": "icons/icon.png?v=3",
         "sizes": "256x256",
         "type": "image/png"
     },
     {
-        "src": "icons/ok.png?v=2",
+        "src": "icons/icon.png?v=3",
         "sizes": "180x180",
         "type": "image/png"
     },
     {
-        "src": "icons/ok.png?v=2",
+        "src": "icons/icon.png?v=3",
         "sizes": "144x144",
         "type": "image/png"
     }
